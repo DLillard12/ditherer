@@ -108,10 +108,11 @@ def process_frame(img: Image, pixelation_factor: int, random_factor: int, diverg
     # Operations from now on expect a numpy array.
     arr = np.array(img_pixelated)
 
-    # divergence_point = arr.mean()
     # try divergence point as median
-    divergence_point = np.median(arr)
-    divergence_factor = compute_divergence_factor(arr)
+    if divergence_point is None:
+        divergence_point = np.median(arr)
+    if divergence_factor is None:
+        divergence_factor = compute_divergence_factor(arr)
     arr = pixel_divergence(arr, divergence_factor, divergence_point)
 
     arr_random = add_random_pixels(arr, random_factor)
@@ -119,6 +120,28 @@ def process_frame(img: Image, pixelation_factor: int, random_factor: int, diverg
     final_image = Image.fromarray(np.uint8(arr_dithered))
 
     return final_image
+
+
+# this is for the TUI
+def dither_image_file(
+    input_path: str,
+    output_path: str,
+    pixelation_factor: int,
+    random_factor: int,
+    divergence_factor: float,
+    divergence_point: float
+) -> None:
+    img = Image.open(input_path).convert('L')
+
+    final_image = process_frame(
+        img,
+        pixelation_factor,
+        random_factor,
+        divergence_factor,
+        divergence_point
+    )
+
+    final_image.save(output_path)
 
 # --------------
 # Main Code
