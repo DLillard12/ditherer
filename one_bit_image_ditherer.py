@@ -16,15 +16,16 @@ import sys # for command line args
 #   Constants
 # --------------
 
-b = 255
-w = 0
+# d for darker, l for lighter.
+d = 255
+l = 0
 patterns = np.array([
-    [[w,w,w],[w,w,w],[w,w,w]],        # bucket 0
-    [[w,w,w],[w,b,w],[w,w,w]],      # bucket 1
-    [[b,w,b],[w,w,w],[b,w,b]],# bucket 2
-    [[w,b,w],[b,b,b],[w,b,w]], # bucket 3
-    [[b,b,b],[b,w,b],[b,b,b]], # bucket 4
-    [[b,b,b],[b,b,b],[b,b,b]] # bucket 5
+    [[l,l,l],[l,l,l],[l,l,l]],        # bucket 0
+    [[l,l,l],[l,d,l],[l,l,l]],      # bucket 1
+    [[d,l,d],[l,l,l],[d,l,d]],# bucket 2
+    [[l,d,l],[d,d,d],[l,d,l]], # bucket 3
+    [[d,d,d],[d,l,d],[d,d,d]], # bucket 4
+    [[d,d,d],[d,d,d],[d,d,d]] # bucket 5
 ], dtype=np.uint8)
 
 # --------------
@@ -68,7 +69,6 @@ def add_random_pixels(img_array: np.array, random_factor: int):
 
     return img_array
 
-
 def expand_pixels(img_array):
     img_array = img_array.astype(np.uint8)
 
@@ -100,7 +100,17 @@ def compute_divergence_factor(gray: np.ndarray,
 
     return min_df + (max_df - min_df) * norm
 
-def process_frame(img: Image, pixelation_factor: int, random_factor: int, divergence_factor: float, divergence_point: float):
+def colorize(img_array, dark_hex, light_hex):
+    def hex_to_rgb(h):
+        h = h.lstrip('#')
+        return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+    rgb = np.zeros((*img_array.shape, 3), dtype=np.uint8)
+    rgb[img_array == 0] = hex_to_rgb(dark_hex)
+    rgb[img_array == 255] = hex_to_rgb(light_hex)
+    return rgb
+
+def process_frame(img: Image, pixelation_factor: int, random_factor: int, divergence_factor: float, divergence_point: float, darker_color: str = "#000000", lighter_color: str = "#FFFFFF") -> Image:
     # Performing operations on image object
     img_pixelated = pixelate(pixelation_factor,img)  # Higher is more pixelated
 
@@ -117,6 +127,9 @@ def process_frame(img: Image, pixelation_factor: int, random_factor: int, diverg
 
     arr_random = add_random_pixels(arr, random_factor)
     arr_dithered = expand_pixels(arr_random)
+    if darker_color != "#000000" or lighter_color != "#FFFFFF":
+        arr_dithered = colorize(arr_dithered, darker_color, lighter_color)
+        print("Colorized image with colors:", darker_color, lighter_color)
     final_image = Image.fromarray(np.uint8(arr_dithered))
 
     return final_image
@@ -126,10 +139,12 @@ def process_frame(img: Image, pixelation_factor: int, random_factor: int, diverg
 def dither_image_file(
     input_path: str,
     output_path: str,
-    pixelation_factor: int,
-    random_factor: int,
-    divergence_factor: float,
-    divergence_point: float
+    pixelation_factor: int = 12,
+    random_factor: int = 8,
+    divergence_factor: float = 4,
+    divergence_point: float = 128.0,
+    darker_color: str = "#000000",
+    lighter_color: str = "#FFFFFF"
 ) -> None:
     img = Image.open(input_path).convert('L')
 
@@ -138,7 +153,9 @@ def dither_image_file(
         pixelation_factor,
         random_factor,
         divergence_factor,
-        divergence_point
+        divergence_point,
+        darker_color,
+        lighter_color
     )
 
     final_image.save(output_path)
@@ -162,6 +179,8 @@ def main():
     random_factor = 8
     divergence_factor = 4
     divergence_point = 128.0
+    darker_color = "#000000"
+    lighter_color = "#FFFFFF"
 
     if len(sys.argv) >= 4:
         pixelation_factor = int(sys.argv[3])
@@ -171,11 +190,16 @@ def main():
         divergence_factor = float(sys.argv[5])
     if len(sys.argv) >= 7:
         divergence_point = float(sys.argv[6])
+    if len(sys.argv) >= 8:
+        darker_color = sys.argv[7]
+    if len(sys.argv) >= 9:
+        lighter_color = sys.argv[8]
     
     path = os.path(input_image_path)
+    # here is where the image is converted to grayscale.
     img = Image.open(path).convert('L')
 
-    final_image = process_frame(img, pixelation_factor, random_factor, divergence_factor, divergence_point)
+    final_image = process_frame(img, pixelation_factor, random_factor, divergence_factor, divergence_point, lighter_color=lighter_color, darker_color=darker_color)
 
     final_image.save(fp=output_image_path)
 

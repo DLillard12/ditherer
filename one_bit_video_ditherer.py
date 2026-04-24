@@ -68,6 +68,8 @@ def main():
     random_factor = 8
     divergence_factor = 4
     divergence_point = 128.0
+    darker_color = "#000000"
+    lighter_color = "#FFFFFF"
 
     if len(sys.argv) >= 4:
         pixelation_factor = int(sys.argv[3])
@@ -77,6 +79,10 @@ def main():
         divergence_factor = float(sys.argv[5])
     if len(sys.argv) >= 7:
         divergence_point = float(sys.argv[6])
+    if len(sys.argv) >= 8:
+        darker_color = sys.argv[7]
+    if len(sys.argv) >= 9:
+        lighter_color = sys.argv[8]
 
     process_frame_folder(video_name, output_video_name, pixelation_factor, random_factor, divergence_factor, divergence_point)
 
