@@ -51,6 +51,33 @@ def frames_to_video(video_name):
 
 
 # --------------
+# For the TUI
+# --------------
+# this is for the TUI
+def dither_video(
+    input_video_path: str,
+    video_name: str,
+    pixelation_factor: int = 12,
+    random_factor: int = 8,
+    divergence_factor: float = 4,
+    divergence_point: float = 128.0,
+    darker_color: str = "#000000",
+    lighter_color: str = "#FFFFFF"
+) -> None:
+    video_to_frames(input_video_path, video_name)
+
+    process_frame_folder(
+        video_name,
+        pixelation_factor,
+        random_factor,
+        divergence_factor,
+        divergence_point,
+        darker_color,
+        lighter_color
+    )
+
+    frames_to_video(video_name)
+# --------------
 # Main Code
 # --------------
 
@@ -84,7 +111,7 @@ def main():
     if len(sys.argv) >= 9:
         lighter_color = sys.argv[8]
 
-    process_frame_folder(video_name, output_video_name, pixelation_factor, random_factor, divergence_factor, divergence_point)
+    process_frame_folder(video_name, output_video_name, pixelation_factor, random_factor, divergence_factor, divergence_point, darker_color, lighter_color)
 
     frames_to_video(output_video_name)
 

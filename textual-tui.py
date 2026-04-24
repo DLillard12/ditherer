@@ -90,9 +90,9 @@ class OneBitDitherApp(App):
         if self.mode == 'image':
             self.run_image(input_path, output_path, pixelation, random_factor, divergence, divergence_point, darker_color, lighter_color)
         elif self.mode == 'frames':
-            self.run_frames(input_path, output_path, pixelation, random_factor, divergence, divergence_point)
+            self.run_frames(input_path, output_path, pixelation, random_factor, divergence, divergence_point, darker_color, lighter_color)
         elif self.mode == 'video':
-            self.run_video(input_path, output_path, pixelation, random_factor, divergence, divergence_point)
+            self.run_video(input_path, output_path, pixelation, random_factor, divergence, divergence_point, darker_color, lighter_color)
 
         self.query_one('#status', Static).update('Done.')
 
