@@ -22,7 +22,8 @@ from one_bit_frames_ditherer import process_frame_folder
 # --------------
 #   Functions
 # --------------
-def video_to_frames(video_path, video_name):
+def video_to_frames(video_path):
+    video_name = os.path.basename(video_path).split('.')[0]
     output_folder = 'input/' + video_name + '_frames/'
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -44,7 +45,7 @@ def frames_to_video(video_name):
     '-c:v', 'libx264',
     '-pix_fmt', 'yuv420p',
     '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2',
-    'output/'+ video_name +'_dithered.mp4'
+    'output/'+ video_name +'.mp4'
     ]
 
     subprocess.run(cmd, check=True)
@@ -53,7 +54,6 @@ def frames_to_video(video_name):
 # --------------
 # For the TUI
 # --------------
-# this is for the TUI
 def dither_video(
     input_video_path: str,
     video_name: str,
@@ -64,9 +64,10 @@ def dither_video(
     darker_color: str = "#000000",
     lighter_color: str = "#FFFFFF"
 ) -> None:
-    video_to_frames(input_video_path, video_name)
+    video_to_frames(input_video_path)
 
     process_frame_folder(
+        input_video_path,
         video_name,
         pixelation_factor,
         random_factor,
