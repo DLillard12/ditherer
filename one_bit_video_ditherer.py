@@ -24,15 +24,15 @@ from one_bit_frames_ditherer import process_frame_folder
 # --------------
 def video_to_frames(video_path):
     video_name = os.path.basename(video_path).split('.')[0]
-    output_folder = 'input/' + video_name + '_frames/'
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    input_folder_path = os.path.dirname(video_path) + "\\" + video_name + "_frames\\"
+    if not os.path.exists(input_folder_path):
+        os.makedirs(input_folder_path)
 
     cmd = [
         'ffmpeg',
         '-i', video_path,
         '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2',
-        output_folder + 'frame_%06d.png'
+        input_folder_path + 'frame_%06d.png'
     ]
 
     subprocess.run(cmd, check=True)

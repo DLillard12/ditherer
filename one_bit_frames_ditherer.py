@@ -26,15 +26,25 @@ from one_bit_image_ditherer import (process_frame)
 
 # this function is also in the one_bit_video_ditherer,
 # it would be best to make a shared function for this, but for now it is duplicated.
-def frames_to_video(video_name):
+def frames_to_video(video_name, video_path):
+    if (video_path.endswith('.mp4') or video_path.endswith('.avi') or video_path.endswith('.mkv')):
+        input_video_name = os.path.basename(video_path).split('.')[0]
+        input_folder_path = os.path.dirname(video_path) + "\\" + input_video_name + "_frames\\"
+    else:
+        input_folder_path = video_path
+    
+    # going two back
+    output_video_path = os.path.dirname(input_folder_path)
+    output_video_path = output_video_path + "\\output\\" + video_name + "_frames\\"
+
     cmd = [
     'ffmpeg',
     '-framerate', '30',
-    '-i', 'output/'+ video_name +'_frames/frame_%06d.png',
+    '-i', output_video_path + 'frame_%06d.png',
     '-c:v', 'libx264',
     '-pix_fmt', 'yuv420p',
     '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2',
-    'output/'+ video_name +'.mp4'
+    os.path.dirname(input_folder_path)+ '\\' + video_name +'.mp4'
     ]
 
     subprocess.run(cmd, check=True)
@@ -51,7 +61,8 @@ def process_frame_folder(input_video_path: str, processed_video_name: str, pixel
     else:
         input_folder_path = input_video_path
     
-    output_video_path = "output\\" + processed_video_name + "_frames\\"
+    output_video_path = os.path.dirname(input_folder_path)
+    output_video_path = output_video_path + "\\output\\" + processed_video_name + "_frames\\"
 
     if not os.path.exists(output_video_path):
         os.makedirs(output_video_path)
@@ -83,7 +94,7 @@ def dither_frames(
     process_frame_folder(input_video_path, processed_video_name, pixelation_factor, random_factor, divergence_factor, divergence_point, darker_color, lighter_color)
     
     # need to somehow make the video.
-    frames_to_video(processed_video_name)
+    frames_to_video(processed_video_name, input_video_path)
 
 # --------------
 # Main Code
